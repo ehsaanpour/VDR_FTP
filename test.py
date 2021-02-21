@@ -10,7 +10,7 @@ def login_to(URL , user , passwd):
     ftp = FTP(URL)
     #ftp.connect()
     ftp.login (user,passwd)
-    print('you are login')
+    window['-comment10-'].update('Loging Successfully')
 
 #identify the files name.
 def file_name():
@@ -29,45 +29,73 @@ def file_name():
     return listing
     
 
-# download the file
-def download_All_file():
-    for index,filename in enumerate(listing):
-        #s = 'd:\VDR\{}'.format(filename)
-        s= sg.PopupGetFile()
-        local_filename = os.path.join(s)
-        lf = open(local_filename, "wb")
-        ftp.retrbinary("RETR " + listing, lf.write, 8*1024)
-        lf.close()
+#download files
+# def download_All_file():
+#     files = ftp.nlst()
+#     folder_path = sg.PopupGetFolder('please open the folder')
+#     print(folder_path)
+#     for file in files:
+# 	    print("Downloading..." + file)
+#     window['-comment1-'].update(file,'در حال دانلود ')
+# 	    ftp.retrbinary("RETR " + file ,open(folder_path + file, 'wb').write)
 
+#             print(file,'Downloaded')
+#     window['-comment1-'].update(file, 'دانلود کامل شد ')
+#     ftp.close()    
+
+#download the file
+def download_All_file():
+    files = ftp.nlst()
+    folder_path = sg.PopupGetFolder('please open the folder') 
+    #folder_path = folder_path + "\"
+    window['-comment10-'].update('Please wait ...')
+    for filename in files:
+        #s = 'd:\VDR\{}'.format(filename)
+        #local_filename = folder_path + filename
+        #print(local_filename)
+        window['-comment10-'].update('Please wait ...')
+        local_filename = os.path.join(os.path.normpath(folder_path), filename)
+        lf = open(local_filename, "wb")
+        ftp.retrbinary("RETR " + filename, lf.write)
+        print(filename, 'Downloaded')
+        window['-comment10-'].update(f'{filename} Completed')
+        lf.close()
+    window['-comment10-'].update('Download Completed.')
 #download each file
 def download_each_file():
-    local_filename = os.path.join(r"d:\myfolder\project", filename)
-    #for file in listing :
+    window['-comment10-'].update('Please wait ...')
+    each_file = values['-comment1-'][0]
+    print(each_file,type(each_file))
+    folder_path = sg.PopupGetFolder('please open the folder')
+    #local_filename = folder_path + each_file
+    local_filename = os.path.join(os.path.normpath(folder_path), each_file)
+    lf = open(local_filename, "wb")
+    ftp.retrbinary("RETR " + each_file, lf.write)
+    print(each_file, 'Downloaded')
+    window['-comment10-'].update(f'{each_file} Completed')
+    lf.close()
+    
 
 
 
 listing= []
 
-layout = [  [sg.Text(text='           ')],
-            [sg.Text('',size=(15,1)),sg.Text(text='VDR',font=('impact',22),text_color='orange'),sg.Text('')],
-            [sg.Text('',size=(12,1)),sg.Text(text='انتقال فایل های ایکس دی کم',font='tahoma',text_color='green')],
-            [sg.Text(text='           ')],
+layout = [  [sg.Text('',size=(3,1)),sg.Text(text='VDR Transferer',font=('impact',35),text_color='orange'),sg.Text('')],
+            [sg.Image('VDR.png'),sg.Image('arrow.png'),sg.Image('laptop.png')],
             [sg.Text('',size=(12,1),font='tahoma',text_color='black'),sg.Text('',size=(12,1))],
-            [sg.Text(text='Ip Adress', font='tahoma',text_color='black'),sg.InputText(default_text='192.168.1.10',size=(20,2))],
-            [sg.Text(text='Username',font='tahoma',text_color='black'),sg.InputText(default_text='admin', size=(20,2))],
-            [sg.Text(text='Password',font='tahoma',text_color='black'),sg.InputText(default_text='pdw-hd1500',size=(20,2))],
-            
+            [sg.Text(text='Ip Address', font='Elephant',text_color='black'),sg.InputText(default_text='192.168.1.10',size=(20,2),key='-Ip-')],
+            [sg.Text(text='Username  ',font='Elephant',text_color='black'),sg.InputText(default_text='admin', size=(20,2),key='-user-'),sg.Button('Login',size=(8,3))],
+            [sg.Text(text='Password  ',font='Elephant',text_color='black'),sg.InputText(default_text='pdw-hd1500',size=(20,2),key='-pass-')],
             [sg.Text(text='           ',font='impact',justification='center')],
-            [sg.Text(text='           ')],
-            [sg.Listbox(values=listing ,size=(50,10),key='-comment1-')],
-            [sg.Text('',size=(10,1)),sg.Button('Login'), sg.Text('   '), sg.Button('Download All'),sg.Button('Close')],
-            [sg.StatusBar('Status: ',size=(30,1), key='-comment10-')],
-            [sg.Text(text='All right reserved for Ehsanpour.com',text_color='yellow',enable_events=True)]
+            [sg.Listbox(values=listing ,size=(50,10),enable_events=True, key='-comment1-')],
+            [sg.Button('Download All'),sg.Button('Download File')],
+            [sg.StatusBar('Please Login ... ',size=(30,1), key='-comment10-',text_color='black',font=('Lilyupc',18))],
+            [sg.Text(text='All right reserved for Ehsanpour.com and Hakamian',text_color='yellow',enable_events=True)]
             
             ]
 
 # Create the Window
-window = sg.Window('VDR', layout)
+window = sg.Window('VDR Transferer', layout)
 print(window)
 win2_active=False  
 index_counter= 0
@@ -77,15 +105,21 @@ while True:
     if event == sg.WIN_CLOSED or event == 'Close': # if user closes window or clicks cancel
         break
     if event == 'Login':
-        URL = values [0]
-        username= values[1]
-        password= values[2]
+        URL = values ['-Ip-']
+        
+        username= values['-user-']
+        
+        password= values['-pass-']
+        
         # change the "output" element to be the value of "input" element
         login_to(URL,user= username,passwd= password)
         #show file
         file_name()
     if event == 'Download All':  
         download_All_file() 
+
+    if event == 'Download File':
+        download_each_file()
     #windows 2 multiple page for STOP function
         
 
