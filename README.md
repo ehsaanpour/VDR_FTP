@@ -33,4 +33,4 @@ This project provides a simple graphical user interface (GUI) application for tr
 
 **Attribution:**
 
-All rights reserved for Ehsanpour.com and Hakamian.
+All rights reserved for Ehsan Ehsanpour.
